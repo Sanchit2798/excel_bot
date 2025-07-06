@@ -9,7 +9,6 @@
     <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Contoso Task Pane Add-in</title>
-
     <!-- Office JavaScript API -->
     <script type="text/javascript" src="https://appsforoffice.microsoft.com/lib/1/hosted/office.js"></script>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
@@ -28,13 +27,10 @@
             console.log("I CAME HEREe");
             // Get the target cell B1
             const targetCell = sheet.getRange("B1");
-
             // Place the formula in B1 to sum A1:A5
             targetCell.formulas = [['=SUM(A1:A10)']];
-
             // Highlight cell B1 in yellow
             targetCell.format.fill.color = "orange";
-
             await context.sync();
         });
     </script> -->

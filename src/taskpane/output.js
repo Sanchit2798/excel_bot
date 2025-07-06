@@ -1,16 +1,13 @@
-
 async function llm_action() {
   await Excel.run(async (context) => {
     const sheet = context.workbook.worksheets.getActiveWorksheet();
+    const firstRow = sheet.getRange("1:1");
 
-    // Set the formula in B1 to sum A1:A5
-    const targetCell = sheet.getRange("B1");
-    targetCell.formulas = [
-      ["=SUM(A1:A5)"]
-    ];
+    firstRow.load("format/rowHeight");
+    await context.sync();
 
-    // Highlight cell B1 with yellow color
-    targetCell.format.fill.color = "yellow";
+    const currentRowHeight = firstRow.format.rowHeight;
+    firstRow.format.rowHeight = currentRowHeight * 2;
 
     await context.sync();
   });
