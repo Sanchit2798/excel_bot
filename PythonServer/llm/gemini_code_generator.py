@@ -3,6 +3,21 @@ from google import genai
 from google.genai import types
 from tenacity import retry, stop_after_attempt, wait_exponential
 from llm.interfaces.icode_generator import ICodeGenerator
+from llama_index.retrievers.bm25 import BM25Retriever
+
+loaded_bm25_retriever = BM25Retriever.from_persist_dir("./bm25_retriever")
+def query_bm25_retriever(retriever, query_text="document"):
+    """
+    Queries the BM25 retriever and prints the results.
+
+    Args:
+        retriever (BM25Retriever): The loaded BM25 retriever.
+        query_text (str): The query string.
+    """
+    results = retriever.retrieve(query_text)
+    print(f"Query: {query_text}")
+    content = "".join([node.get_content() for node in results])
+    return content
 
 
 class GeminiCodeGenerator(ICodeGenerator):
@@ -30,7 +45,8 @@ class GeminiCodeGenerator(ICodeGenerator):
     ) -> str:
         """Generate code using Gemini API with retry logic for resilience."""
         # Construct the prompt
-        prompt = self._construct_prompt(specification)
+        retreived_content =  query_bm25_retriever(loaded_bm25_retriever, specification)
+        prompt = self._construct_prompt(specification, retrieved_content=retreived_content)
         
         # Call the API
         response = self.client.models.generate_content(
@@ -56,11 +72,12 @@ class GeminiCodeGenerator(ICodeGenerator):
     def _construct_prompt(
         self, 
         specification: str, 
+        retrieved_content: Optional[str] = None,
         examples: Optional[List[Dict[str, str]]] = None
     ) -> str:
         """Construct an effective prompt for code generation."""
         prompt = f"Generate code using javascript excel add in api for the following requirement:\n\n{specification}\n\n"
-        
+        prompt += f"You can use following relevant infromation from documentation:\n\n{retrieved_content}\n\n"
         # if examples:
         #     prompt += "Here are some examples of similar code:\n\n"
         #     for i, example in enumerate(examples):
