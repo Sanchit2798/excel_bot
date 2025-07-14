@@ -33,7 +33,8 @@ export async function run() {
       let userInput = document.getElementById("userInput").value;
       console.log("input value : ", userInput);
       chat_json = addChatHistoryEntry(chat_json, "user", userInput);
-      chat_json = makeLlmCall(chat_json);
+      chat_json = await makeLlmCall(chat_json);
+      await Promise.resolve(chat_json).then((result) => console.log("chat_json: ", result));
       await context.sync();
     });
   } catch (error) {
