@@ -1,14 +1,4 @@
-function loadScriptAsync(src) {
-  return new Promise((resolve, reject) => {
-    const script = document.createElement("script");
-    script.src = src;
-    script.onload = () => resolve();
-    script.onerror = () => reject(new Error(`Failed to load script: ${src}`));
-    document.head.appendChild(script);
-  });
-}
-
-async function makeLlmCall() {
+export async function makeLlmCall(chat_json) {
   let endReached = false;
   while (!endReached) {
     try {
@@ -42,6 +32,16 @@ async function makeLlmCall() {
   }
 
   return chat_json;
+}
+
+function loadScriptAsync(src) {
+  return new Promise((resolve, reject) => {
+    const script = document.createElement("script");
+    script.src = src;
+    script.onload = () => resolve();
+    script.onerror = () => reject(new Error(`Failed to load script: ${src}`));
+    document.head.appendChild(script);
+  });
 }
 
 // export async function makeLlmCall(chat_json) {
@@ -80,15 +80,15 @@ async function makeLlmCall() {
 //   return chat_json;
 // } 
 
-// export function addChatHistoryEntry(chat_json, role, response) {
-//   chat_json.chat_history.push({
-//     id: chat_json.chat_history.length + 1,
-//     timestamp: new Date().toISOString(),
-//     role: role,
-//     response: response
-//   });
-//   return chat_json;
-// }
+export function addChatHistoryEntry(chat_json, role, response) {
+  chat_json.chat_history.push({
+    id: chat_json.chat_history.length + 1,
+    timestamp: new Date().toISOString(),
+    role: role,
+    response: response
+  });
+  return chat_json;
+}
 
 // function loadScript(file, callback) {
 //   const script = document.createElement('script');
