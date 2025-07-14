@@ -16,16 +16,16 @@ def handle_request():
     print("Received request")
     try:
         # Get JSON data from the request
-        data = request.get_json()
-        if not data:
+        chat_json = request.get_json()
+        if not chat_json:
             return jsonify({"error": "Invalid or missing JSON data"}), 400
         
-        code = gemini_code_generator.generate_code(
-            specification=data['question'],
+        chat_json, code = gemini_code_generator.generate_code(
+            chat_json=chat_json
         ) 
         with open(os.getenv("OUTPUT_FILE"), "w") as f:
             f.write(code)  
-        return jsonify(code), 200
+        return jsonify(chat_json), 200
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 

@@ -1,3 +1,4 @@
+import datetime
 from typing import Dict, List, Optional
 from google import genai
 from google.genai import types
@@ -37,16 +38,19 @@ class GeminiCodeGenerator(ICodeGenerator):
     # @retry(stop=stop_after_attempt(3), wait=wait_exponential(min=1, max=10))
     def generate_code(
         self, 
-        specification: str, 
-        # language: str, 
-        # examples: Optional[List[Dict[str, str]]] = None,
-        # max_tokens: int = 2000,
-        # temperature: float = 0.2,
+        chat_json: str, 
     ) -> str:
         """Generate code using Gemini API with retry logic for resilience."""
+        chat_history = chat_json.get("chat_history", [])
+        last_user_input = chat_history[-1]["response"]
+
+        # Define the grounding tool
+        chat_history = self.do_web_search(chat_history)
+
         # Construct the prompt
-        retreived_content =  query_bm25_retriever(loaded_bm25_retriever, specification)
-        prompt = self._construct_prompt(specification, retrieved_content=retreived_content)
+        retreived_content = query_bm25_retriever(loaded_bm25_retriever, last_user_input)
+        self.create_chat_entry(chat_history, "documentation_retriever", retreived_content)
+        prompt = self._construct_prompt(chat_history)
         
         # Call the API
         response = self.client.models.generate_content(
@@ -60,28 +64,51 @@ class GeminiCodeGenerator(ICodeGenerator):
             "For acheiving the specification, use the javascript excel add in api to reflect changes in the excel worksheet ",
             "Try to use excel formulas or excel funcationality whereever you can,"
             "The user should be able to see the changes in excel workbook",
-            "The code you generate is essentially executed as part of the excel add in whose aim is to automate tasks in excel",]),
+            "The code you generate is essentially executed as part of the excel add in whose aim is to automate tasks in excel",]),            
         )
         # Extract and return the code
         code = response.text.split(self.language, 1)[1].strip() if self.language in response.text else response.text.strip() 
         #also remove the trailing backticks if present
         if code.endswith("```"):
             code = code[:-3].strip()
-        return code
+        self.create_chat_entry(chat_history, "code_generation_by_you", code)
+        chat_json["chat_history"] = chat_history
+        return chat_json, code
+
+    def do_web_search(self, chat_history):
+        grounding_tool = types.Tool(
+            google_search=types.GoogleSearch()
+        )
+        
+        # Perform web search to find relevant information
+        response_from_web_search = self.client.models.generate_content(
+            model=self.model,
+            contents= "consider the following chat history for context:\n" +
+                      "\n".join([f"{entry['role']}: {entry['response']}" for entry in chat_history]) +
+                      "You are tasked to Generate code using javascript excel add-in api" +
+                      "Use web search to find relevant information and code snippets" ,
+            config=types.GenerateContentConfig(
+            tools=[grounding_tool]),            
+        )
+        self.create_chat_entry(chat_history, "web_search", response_from_web_search.text)
+        return chat_history
 
     def _construct_prompt(
         self, 
-        specification: str, 
-        retrieved_content: Optional[str] = None,
-        examples: Optional[List[Dict[str, str]]] = None
+        chat_history: List[Dict[str, str]]
     ) -> str:
         """Construct an effective prompt for code generation."""
-        prompt = f"Generate code using javascript excel add in api for the following requirement:\n\n{specification}\n\n"
-        prompt += f"You can use following relevant infromation from documentation:\n\n{retrieved_content}\n\n"
-        # if examples:
-        #     prompt += "Here are some examples of similar code:\n\n"
-        #     for i, example in enumerate(examples):
-        #         prompt += f"Example {i+1}:\nSpecification: {example['specification']}\nCode:\n{example['code']}\n\n"
         
-        prompt += f"Now, generate only the code that meets the requirement."
+        prompt = f"Consider the following chat history for context:\n"
+        for entry in chat_history:
+            prompt += f"{entry['role']}: {entry['response']}\n"
+        prompt += f"\n\n Generate code using javascript excel add-in api"        
+        prompt += f"\n\n Now, generate only the code that meets the requirement."
         return prompt
+
+    def create_chat_entry(self, chat_history, role, message):
+        return chat_history.append({
+        "id": len(chat_history) + 1,  # simple id based on the current history size
+        "timestamp": datetime.datetime.now().isoformat(),
+        "role": role,
+        "response": message})

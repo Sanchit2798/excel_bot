@@ -2,8 +2,7 @@
 <!-- This file shows how to design a first-run page that provides a welcome screen to the user about the features of the add-in. -->
 
 <!DOCTYPE html>
-<html>
-    
+<html>  
 <head>
     <meta charset="UTF-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
@@ -59,12 +58,13 @@
             </li>
         </ul>
         <form id="frm1">
-            Action to do: <input type="text" name="Action" id="actionInput"><br>
+            Action to do: <input type="text" name="Action" id="userInput"><br>
         </form>
         <p class="ms-font-l">Modify the source files, then click <b>RUN</b>.</p>
         <div role="button" id="run" class="ms-welcome__action ms-Button ms-Button--hero ms-font-xl">
             <span class="ms-Button-label">Run</span>
         </div>
+        <div id="loader" class="loader" style="display: none;"></div>
         <p><label id="item-subject"></label></p>
     </main>
 </body>
