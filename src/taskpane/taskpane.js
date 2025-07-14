@@ -34,6 +34,7 @@ export async function run() {
       console.log("input value : ", userInput);
       chat_json = addChatHistoryEntry(chat_json, "user", userInput);
       chat_json = makeLlmCall(chat_json);
+      await context.sync();
     });
   } catch (error) {
     console.error(error);
