@@ -1,4 +1,4 @@
-export async function makeLlmCall(chat_json) {
+export async function makeLlmCall(chat_json) { 
   let endReached = false;
   while (!endReached) {
     try {
@@ -14,8 +14,9 @@ export async function makeLlmCall(chat_json) {
 
       if (typeof llm_action === "function") {
         try {
-          await llm_action(); // Assuming llm_action returns a Promise or you control when it's done
+          await Promise.resolve(llm_action()); // Assuming llm_action returns a Promise or you control when it's done
           endReached = true;
+          //await context.sync();
         } catch (error) {
           console.error("Error executing llm_action:", error);
           chat_json = addChatHistoryEntry(chat_json, "code_execution_error", error.message);

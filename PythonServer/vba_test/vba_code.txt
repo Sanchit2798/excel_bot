@@ -1,0 +1,5 @@
+Sub DoubleColumnWidth()
+    Application.SendKeys "%HH", True
+    Application.SendKeys "{DOWN}", True
+    Application.SendKeys "{ENTER}", True
+End Sub

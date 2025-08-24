@@ -45,7 +45,7 @@ class GeminiCodeGenerator(ICodeGenerator):
         last_user_input = chat_history[-1]["response"]
 
         # Define the grounding tool
-        chat_history = self.do_web_search(chat_history)
+        # chat_history = self.do_web_search(chat_history)
 
         # Construct the prompt
         retreived_content = query_bm25_retriever(loaded_bm25_retriever, last_user_input)
