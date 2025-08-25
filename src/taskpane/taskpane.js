@@ -6,7 +6,6 @@
 /* global console, document, Excel, Office */
 
 console.log("Loading taskpane.js...");
-import {makeLlmCall, addChatHistoryEntry} from "./llmconnector.js";
 
 function showLoader() {
   document.getElementById('loader').style.display = 'block';
@@ -32,12 +31,30 @@ export async function run() {
   try {
     const userInput = document.getElementById("userInput").value;
     console.log("input value:", userInput);
+    chat_json = await addChatHistoryEntry(chat_json, "user", userInput);
+
+    // const numberOfattemps = 0;
+    // const maxAttempts = 2;
+    // while (numberOfattemps < maxAttempts) {
+    // }
+
+    // const response = await fetch("http://127.0.0.1:5000/api", {
+    //   method: "POST",
+    //   headers: { "Content-Type": "application/json" },
+    //   body: JSON.stringify(chat_json),
+    // });
+
+    // if (response.ok) {
+    //   let response_json = await response.json();
+    //   chat_json = await addChatHistoryEntry(chat_json, "LLM", response_json);
+    // }
+    // else {
+    //   console.error("Error from API:", response.statusText);
+    //   throw new Error("Could not fetch from API");
+    // }
 
     await Excel.run(async (context) => {
-      console.log("trying in taskpane");
-
-      chat_json = addChatHistoryEntry(chat_json, "user", userInput);
-
+      console.log("Inside Excel.run in taskpane.js");
       // Load the script and wait for llm_action to complete
       await new Promise((resolve, reject) => {
         const script = document.createElement("script");
@@ -45,11 +62,11 @@ export async function run() {
 
         script.onload = async () => {
           try {
-            await llm_action(context); // Wait for llm_action to complete
+            await llm_action(context);
+            await context.sync(); // Wait for llm_action to complete
             resolve();
           } catch (error) {
             console.error("Error in llm_action:", error);
-            reject(error);
           }
         };
 
@@ -60,16 +77,24 @@ export async function run() {
 
         document.head.appendChild(script);
       });
-
-      console.log("llm_action executed successfully.");
-      await context.sync();
+      await context.sync(); 
       console.log("Excel context synced.");
     });
 
   } catch (error) {
-    console.error("Error in run():", error);
+    console.error(error);
     location.reload();
   }
 
   hideLoader();
+}
+
+function addChatHistoryEntry(chat_json, role, response) {
+  chat_json.chat_history.push({
+    id: chat_json.chat_history.length + 1,
+    timestamp: new Date().toISOString(),
+    role: role,
+    response: response
+  });
+  return chat_json;
 }
