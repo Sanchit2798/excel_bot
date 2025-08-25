@@ -32,59 +32,62 @@ export async function run() {
     const userInput = document.getElementById("userInput").value;
     console.log("input value:", userInput);
     chat_json = await addChatHistoryEntry(chat_json, "user", userInput);
+    } catch (error) {
+    console.error("Error adding user input to chat history:", error);
+    }
 
-    // const numberOfattemps = 0;
-    // const maxAttempts = 2;
-    // while (numberOfattemps < maxAttempts) {
-    // }
-
-    // const response = await fetch("http://127.0.0.1:5000/api", {
-    //   method: "POST",
-    //   headers: { "Content-Type": "application/json" },
-    //   body: JSON.stringify(chat_json),
-    // });
-
-    // if (response.ok) {
-    //   let response_json = await response.json();
-    //   chat_json = await addChatHistoryEntry(chat_json, "LLM", response_json);
-    // }
-    // else {
-    //   console.error("Error from API:", response.statusText);
-    //   throw new Error("Could not fetch from API");
-    // }
-
-    await Excel.run(async (context) => {
-      console.log("Inside Excel.run in taskpane.js");
-      // Load the script and wait for llm_action to complete
-      await new Promise((resolve, reject) => {
-        const script = document.createElement("script");
-        script.src = './output.js';
-
-        script.onload = async () => {
-          try {
-            await llm_action(context);
-            await context.sync(); // Wait for llm_action to complete
-            resolve();
-          } catch (error) {
-            console.error("Error in llm_action:", error);
-          }
-        };
-
-        script.onerror = () => {
-          console.error(`Failed to load script: ${script.src}`);
-          reject(new Error(`Script load error: ${script.src}`));
-        };
-
-        document.head.appendChild(script);
+    let numberOfattemps = 0;
+    const maxAttempts = 2;
+    let executedResonposeSucessfully = false;
+    while ((numberOfattemps < maxAttempts) && 
+    (!executedResonposeSucessfully)){
+      numberOfattemps+=1;
+      const response = await fetch("http://127.0.0.1:5000/api", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(chat_json),
       });
-      await context.sync(); 
-      console.log("Excel context synced.");
-    });
+      
+      if (response.ok){
+        chat_json = await response.json();
+        try {
+          await Excel.run(async (context) => {
+          console.log("Inside Excel.run in taskpane.js");
+          // Load the script and wait for llm_action to complete
+          await new Promise((resolve, reject) => {
+            const script = document.createElement("script");
+            script.src = './output.js';
+            script.onload = async () => {
+            try {
+              await llm_action(context);
+              await context.sync(); // Wait for llm_action to complete
+              executedResonposeSucessfully = true;
+              resolve();
+              } catch (error) {
+              console.error("Error in llm_action:", error);
+              chat_json = await addChatHistoryEntry(chat_json, "user", "encountering following error while executing your suggested code:" + error.message);
+              resolve()
+              }
+            };
+            script.onerror = () => {
+            console.error(`Failed to load script: ${script.src}`);
+            reject(new Error(`Script load error: ${script.src}`));
+            };
+            document.head.appendChild(script);
+          });
 
-  } catch (error) {
-    console.error(error);
-    location.reload();
-  }
+          await context.sync(); 
+          console.log("Excel context synced.");
+          });
+        }
+        catch (error){
+          console.error("Error in trying to run the generated code from llm:", error);
+        }
+      }
+      else{
+        console.error("Error from API:", response.statusText);
+      }
+    }
 
   hideLoader();
 }
