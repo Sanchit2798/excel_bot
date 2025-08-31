@@ -4,6 +4,7 @@
  */
 
 /* global console, document, Excel, Office */
+const vm = require('vm');
 
 console.log("Loading taskpane.js...");
 
@@ -54,27 +55,30 @@ export async function run() {
           await Excel.run(async (context) => {
           console.log("Inside Excel.run in taskpane.js");
           // Load the script and wait for llm_action to complete
-          await new Promise((resolve, reject) => {
+          // await new Promise((resolve, reject) => {
             const script = document.createElement("script");
-            script.src = './output.js';
-            script.onload = async () => {
+            // script.src = './output.js';
+            script.type = "text/javascript";
+            script.textContent = chat_json.chat_history[chat_json.chat_history.length - 1].response;
+            document.head.appendChild(script);
+            // script.onload = async () => {
             try {
-              await llm_action(context);
-              await context.sync(); // Wait for llm_action to complete
+              llm_action(context);
+              context.sync(); // Wait for llm_action to complete
               executedResonposeSucessfully = true;
-              resolve();
+              // resolve();
               } catch (error) {
               console.error("Error in llm_action:", error);
-              chat_json = await addChatHistoryEntry(chat_json, "user", "encountering following error while executing your suggested code:" + error.message);
-              resolve()
+              chat_json = addChatHistoryEntry(chat_json, "user", "encountering following error while executing your suggested code:" + error.message);
+              // resolve()
               }
-            };
+            // };
             script.onerror = () => {
             console.error(`Failed to load script: ${script.src}`);
             reject(new Error(`Script load error: ${script.src}`));
             };
-            document.head.appendChild(script);
-          });
+           
+          // });
 
           await context.sync(); 
           console.log("Excel context synced.");
