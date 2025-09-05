@@ -1,9 +1,9 @@
 {
-  "name": "office-addin-taskpane-js",
+  "name": "office-addin-taskpane",
   "version": "1.0.0",
   "repository": {
     "type": "git",
-    "url": "https://github.com/OfficeDev/Office-Addin-TaskPane-JS.git"
+    "url": "git+https://github.com/OfficeDev/Office-Addin-TaskPane-JS.git"
   },
   "license": "MIT",
   "config": {
@@ -25,14 +25,21 @@
     "start:web": "office-addin-debugging start manifest.xml web",
     "stop": "office-addin-debugging stop manifest.xml",
     "validate": "office-addin-manifest validate manifest.xml",
-    "watch": "webpack --mode development --watch"
+    "watch": "webpack --mode development --watch",
+    "test": "jest"
   },
+
   "dependencies": {
     "@google/genai": "^1.7.0",
+    "@langchain/community": "^0.3.53",
+    "@langchain/core": "^0.3.72",
+    "@langchain/groq": "^0.2.3",
+    "@langchain/langgraph": "^0.4.8",
+    "@langchain/openai": "^0.6.9",
     "core-js": "^3.36.0",
-    "dotenv": "^17.0.0",
+    "dotenv": "^16.4.5",
     "node-polyfill-webpack-plugin": "^4.1.0",
-    "openai": "^5.8.2",
+    "openai": "^4.62.1",
     "regenerator-runtime": "^0.14.1"
   },
   "devDependencies": {
@@ -47,6 +54,7 @@
     "file-loader": "^6.2.0",
     "html-loader": "^5.0.0",
     "html-webpack-plugin": "^5.6.0",
+    "jest": "^30.1.2",
     "office-addin-cli": "^1.6.3",
     "office-addin-debugging": "^5.1.3",
     "office-addin-dev-certs": "^1.13.3",
@@ -64,5 +72,13 @@
   "browserslist": [
     "last 2 versions",
     "ie 11"
-  ]
+  ],
+  "description": "",
+  "main": "webpack.config.js",
+  "keywords": [],
+  "author": "",
+  "bugs": {
+    "url": "https://github.com/OfficeDev/Office-Addin-TaskPane-JS/issues"
+  },
+  "homepage": "https://github.com/OfficeDev/Office-Addin-TaskPane-JS#readme"
 }

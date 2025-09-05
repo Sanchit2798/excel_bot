@@ -77,10 +77,6 @@ module.exports = async (env, options) => {
                 return content.toString().replace(new RegExp(urlDev, "g"), urlProd);
               }
             },
-          },
-          {
-            from: "src/taskpane/output.js",
-            to: "output.js"
           }
         ],
       }),
