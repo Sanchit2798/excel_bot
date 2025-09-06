@@ -80,11 +80,10 @@ export async function run() {
                   }`;
         code = `return async function() {
                 await Excel.run(async (context) => {
-                  console.log("Inside Excel.run in dynamic function");
-                  const worksheet = context.workbook.worksheets.getActiveWorksheet();
-                  const range = worksheet.getRange("B1:B5");
-                  const formula = "=SUM(B1:B5)";
-                  worksheet.getRange("B6").formula = formula;
+                  const sheet = context.workbook.worksheets.getActiveWorksheet();
+                  ABD();
+                  const columnA = sheet.getRange("A:A");
+                  columnA.format.fill.color = "red";
                   await context.sync();
                 });
               };`

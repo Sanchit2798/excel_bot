@@ -1,0 +1,3 @@
+comment out this line - // polyfill: ["core-js/stable", "regenerator-runtime/runtime"],
+to ensure hot loading works.
+
