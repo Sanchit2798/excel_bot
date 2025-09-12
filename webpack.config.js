@@ -1,20 +1,20 @@
 /* eslint-disable no-undef */
 
-const devCerts = require("office-addin-dev-certs");
-const CopyWebpackPlugin = require("copy-webpack-plugin");
-const HtmlWebpackPlugin = require("html-webpack-plugin");
+import { getHttpsServerOptions } from "office-addin-dev-certs";
+import CopyWebpackPlugin from "copy-webpack-plugin";
+import HtmlWebpackPlugin from "html-webpack-plugin";
 
 const urlDev = "https://localhost:3000/";
 const urlProd = "https://www.contoso.com/"; // CHANGE THIS TO YOUR PRODUCTION DEPLOYMENT LOCATION
 
 async function getHttpsOptions() {
-  const httpsOptions = await devCerts.getHttpsServerOptions();
+  const httpsOptions = await getHttpsServerOptions();
   return { ca: httpsOptions.ca, key: httpsOptions.key, cert: httpsOptions.cert };
 }
 
-const NodePolyfillPlugin = require('node-polyfill-webpack-plugin');
+import NodePolyfillPlugin from 'node-polyfill-webpack-plugin';
 
-module.exports = async (env, options) => {
+export default async (env, options) => {
   const dev = options.mode === "development";
   const config = {
     devtool: "source-map",
@@ -25,11 +25,19 @@ module.exports = async (env, options) => {
     output: {
       clean: true,
     },
+    experiments: {
+    topLevelAwait: true
+    },
     resolve: {
-      extensions: [".html", ".js"],
+      extensions: [".html", ".js", ".ts"],
     },
     module: {
       rules: [
+        {
+        test: /\.ts$/,
+        use: 'ts-loader',
+        exclude: /node_modules/
+        },
         {
           test: /\.js$/,
           exclude: /node_modules/,
@@ -39,6 +47,12 @@ module.exports = async (env, options) => {
               presets: ["@babel/preset-env"],
             },
           },
+        },
+        {
+        test: /\.m?js/,
+        resolve: {
+          fullySpecified: false,
+        },
         },
         {
           test: /\.html$/,

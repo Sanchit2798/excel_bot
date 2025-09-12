@@ -1,6 +1,7 @@
 {
   "name": "office-addin-taskpane",
   "version": "1.0.0",
+  "type": "module",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/OfficeDev/Office-Addin-TaskPane-JS.git"
@@ -28,23 +29,32 @@
     "watch": "webpack --mode development --watch",
     "test": "jest"
   },
-
   "dependencies": {
+    "@chroma-core/google-gemini": "^0.1.7",
     "@google/genai": "^1.7.0",
-    "@langchain/community": "^0.3.53",
-    "@langchain/core": "^0.3.72",
+    "@google/generative-ai": "^0.24.1",
+    "@langchain/community": "^0.3.55",
+    "@langchain/core": "^0.3.75",
+    "@langchain/google-genai": "^0.2.17",
+    "@langchain/google-vertexai": "^0.2.17",
     "@langchain/groq": "^0.2.3",
     "@langchain/langgraph": "^0.4.8",
-    "@langchain/openai": "^0.6.9",
+    "@langchain/openai": "^0.6.11",
+    "@langchain/tavily": "^0.1.5",
+    "chromadb": "^3.0.14",
     "core-js": "^3.36.0",
     "dotenv": "^16.4.5",
+    "faiss-node": "^0.5.1",
+    "langchain": "^0.3.33",
     "node-polyfill-webpack-plugin": "^4.1.0",
     "openai": "^4.62.1",
+    "pdf-parse": "^1.1.1",
     "regenerator-runtime": "^0.14.1"
   },
   "devDependencies": {
     "@babel/core": "^7.24.0",
     "@babel/preset-env": "^7.12.11",
+    "@types/node": "^24.3.1",
     "@types/office-js": "^1.0.377",
     "@types/office-runtime": "^1.0.35",
     "acorn": "^8.11.3",
@@ -64,6 +74,10 @@
     "os-browserify": "^0.3.0",
     "process": "^0.11.10",
     "source-map-loader": "^5.0.0",
+    "ts-loader": "^9.5.4",
+    "ts-node": "^10.9.2",
+    "tsx": "^4.20.5",
+    "typescript": "^5.9.2",
     "webpack": "^5.90.3",
     "webpack-cli": "^5.1.4",
     "webpack-dev-server": "^5.2.2"
