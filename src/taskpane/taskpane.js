@@ -7,17 +7,18 @@
 // const GroqModule = require('@langchain/groq');
 
 import { addChatHistoryEntry } from './utilities/add_chat_history_entry.js';
-import { systemPrompt } from './agents/prompts.js';
+// import { systemPrompt } from './agents/prompts.js';
 import { showLoader, hideLoader } from './utilities/loaders.js';
-import { ChatGroq } from "@langchain/groq";
-import {agentComment} from './agents/agent.ts';
-// import * as GroqModule from '@langchain/groq';
-// console.log(GroqModule);
+// import { ChatGroq } from "@langchain/groq";
+import { agentComment } from './agents/agent.ts';
+// import { TavilySearchAgent } from './agents/tavily-search.ts';
+// import { AgenticRAG } from './agents/agentic-rag.ts';
 console.log("Loading taskpane.js...");
 console.log(agentComment);
 let chatJson = {"chatHistory": []};
 
 Office.onReady((info) => {
+  console.log("Office is ready:", info);
   if (info.host === Office.HostType.Excel) {
     document.getElementById("sideload-msg").style.display = "none";
     document.getElementById("app-body").style.display = "flex";
@@ -34,6 +35,9 @@ export async function run() {
     } catch (error) {
     console.error("Error adding user input to chat history:", error);
     }
+
+  // const searchAgent = new TavilySearchAgent()
+  // console.log(await searchAgent.run(userInput_));
 
     // let numberOfattemps = 0;
     // const maxAttempts = 2;
