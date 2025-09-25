@@ -1,19 +1,14 @@
 /* global Excel console */
 // import * as groqModule from '@langchain/groq';
 const groqModule = require('@langchain/groq');
-import { system_prompt } from './prompts';
+import { GoogleGenAI } from "@google/genai";
+import { code_generation_system_prompt, code_extract_prompt } from './prompts';
 import { TavilySearchAgent } from './agents/tavily-search';
 import { AgenticRAG } from './agents/agentic-rag';
 import {googleWebSearch} from './agents/google-gen-web-search';
 const agenticRAG = new AgenticRAG();
-// function showLoader() {
-//   document.getElementById('loader').style.display = 'block';
-// }
-
-// function hideLoader() {
-//   document.getElementById('loader').style.display = 'none';
-// }
-
+// Configure the client
+const googleAi = new GoogleGenAI({apiKey:'AIzaSyBUQ7qNn8wc5NAdpL-j1MblLYykxwpVTns'});
 
 export async function insertText(text: string) {
   let chat_json = {"chat_history": []};
@@ -42,35 +37,56 @@ export async function insertText(text: string) {
     {
       await agenticRAG.init();
     }
-    const ragResponse = await agenticRAG.run("How to do this using excel javascript excel addin?" + 
-                                          userInput_);
+    const ragResponse = await agenticRAG.run("Users wants to generate code to do this using excel javascript excel addin. User query -" + 
+                                          userInput_ +
+                                          "Some reteived info from web search included this:"+
+                                          searchResult);
     chat_json = await addChatHistoryEntry(chat_json, "RagAIAgent", ragResponse);
-    console.log("RAG response:", ragResponse);
+    console.log("RAG response:", ragResponse)
+    // const llm = new groqModule.ChatGroq({
+    //     model: "llama-3.1-8b-instant", // or any other supported model
+    //     temperature: 0.0,
+    //     apiKey:'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' // or pass directly as a string
+    //     });
 
-    const llm = new groqModule.ChatGroq({
-        model: "llama-3.1-8b-instant", // or any other supported model
-        temperature: 0.0,
-        apiKey:'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' // or pass directly as a string
-        });
-
-    const response = await llm.invoke([
-          { role: "system", content: system_prompt },
-          { role: "user", content: chat_json.chat_history.map(entry => `${entry.role}: ${entry.response}`).join("\n") },
-        ]);
+    const response = await googleAi.models.generateContent({
+      model: "gemini-2.5-flash",
+      contents:chat_json.chat_history.map(entry => `${entry.role}: ${entry.response}`).join("\n"),
+      config: {systemInstruction:code_generation_system_prompt}
+    });
+    // await llm.generate([
+    //       { role: "system", content: code_generation_system_prompt },
+    //       { role: "user", content: chat_json.chat_history.map(entry => `${entry.role}: ${entry.response}`).join("\n") },
+    //     ]);
 
     if (response) {
-      let extractedCode = await llm.invoke([
-          { role: "system", content: "Extract only the code bit from the content given, enclose the code between %%. Example %%code%%. Code should be able to be executed as a independent function." },
-          { role: "user", content: response.content }]);
-      let code = 'return ' + extractedCode.content.split("%%")[1];
+      let extractedCode = await googleAi.models.generateContent({
+      model: "gemini-2.5-flash",
+      contents:response.text,
+      config: {systemInstruction:code_extract_prompt}
+    });
+      // await llm.invoke([
+      //     { role: "system", content: code_extract_prompt},
+      //     { role: "user", content: response.content }]);
+      // let code = 'return ' + extractedCode.content.split("<code>")[1];
+      const match = extractedCode.text.match(/<code>([\s\S]*?)<\/code>/);
+      
+      let code = "async function llm_action(){console.log('');}";
+      if (match) {
+        code = "return " + match[1].trimStart();
+        console.log(code);
+      } else {
+        console.log("No <code> block found.");
+      }
+
       chat_json = await addChatHistoryEntry(chat_json, "You", code);
       console.log(code);
 
-      const createFn = new Function(code);
-      const llm_action = createFn();
+      const createdFn = new Function(code);
+      const llmCreatedFn = createdFn();
       
       try {
-        await llm_action(); 
+        await llmCreatedFn(); 
         executedResonposeSucessfully = true;
       }
       catch (error) {

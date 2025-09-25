@@ -38,7 +38,7 @@ module.exports = async (env, options) => {
     //     'node:path':'commonjs2 node:path'
     // },
     resolve: {
-      extensions: [".ts", ".tsx", ".html", ".js"],
+      extensions: [".ts", ".tsx", ".html", ".js", ".css"],
       // fallback: {
       // path: require.resolve('path-browserify'),
       // fs: false, // fs can't be polyfilled meaningfully in browser
@@ -63,6 +63,10 @@ module.exports = async (env, options) => {
           test: /\.html$/,
           exclude: /node_modules/,
           use: "html-loader",
+        },
+        {
+        test: /\.css$/,
+        use: ['style-loader', 'css-loader'],
         },
         {
           test: /\.(png|jpg|jpeg|ttf|woff|woff2|gif|ico)$/,

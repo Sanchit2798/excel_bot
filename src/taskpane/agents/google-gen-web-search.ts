@@ -1,9 +1,8 @@
 import { GoogleGenAI } from "@google/genai";
 
+// Configure the client
+const ai = new GoogleGenAI({apiKey:'AIzaSyBUQ7qNn8wc5NAdpL-j1MblLYykxwpVTns'});
 export async function googleWebSearch(query:string){
-    // Configure the client
-    const ai = new GoogleGenAI({apiKey:'AIzaSyBUQ7qNn8wc5NAdpL-j1MblLYykxwpVTns'});
-
     // Define the grounding tool
     const groundingTool = {
     googleSearch: {},
