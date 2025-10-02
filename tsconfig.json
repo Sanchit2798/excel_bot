@@ -9,20 +9,26 @@
     "jsx": "react",
     "module": "ES2020",
     "moduleResolution": "node",
-    "noImplicitReturns": true,
+    // "noImplicitReturns": true,
     "noUnusedParameters": true,
     "outDir": "dist",
     "removeComments": false,
     "sourceMap": true,
-    "target": "es5",
+    "target": "ES2020",// "es5",
     "lib": [
-      "es7",
-      "dom"
+      //"es7",
+      //"dom"
+      "ES2020", "DOM"
     ],
     "pretty": true,
     "typeRoots": [
       "node_modules/@types"
-    ]
+    ],
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["./src/*"],
+      "@components/*": ["./components/*"]
+    }
   },
   "exclude": [
     "node_modules"
@@ -34,5 +40,6 @@
       "module": "commonjs"
     },
     "files": true 
-  }
+  },
+  "include": [ "**/*.ts", "**/*.tsx","**/*.css"],
 }

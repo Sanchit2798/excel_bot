@@ -1,3 +1,5 @@
 comment out this line - // polyfill: ["core-js/stable", "regenerator-runtime/runtime"],
 to ensure hot loading works.
 
+npm install tailwindcss @tailwindcss/postcss postcss
+is an important command to get the tailwindcss working

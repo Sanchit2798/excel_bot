@@ -65,8 +65,23 @@ module.exports = async (env, options) => {
           use: "html-loader",
         },
         {
-        test: /\.css$/,
-        use: ['style-loader', 'css-loader'],
+          test: /\.css$/,
+
+          use: [
+              "style-loader",
+              {
+                loader: "css-loader",
+                options: {
+                  importLoaders: 1,
+                  modules: false, // important: disables CSS modules
+                },
+              },
+              "postcss-loader",
+            ],
+        },
+        {
+          test: /dot\.css$/,
+          use: "null-loader", // or "ignore-loader" if installed
         },
         {
           test: /\.(png|jpg|jpeg|ttf|woff|woff2|gif|ico)$/,

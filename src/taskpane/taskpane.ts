@@ -10,7 +10,13 @@ const agenticRAG = new AgenticRAG();
 // Configure the client
 const googleAi = new GoogleGenAI({apiKey:'AIzaSyBUQ7qNn8wc5NAdpL-j1MblLYykxwpVTns'});
 
-export async function insertText(text: string) {
+export async function respondToUserQuery(text: string, abortSignal: AbortSignal) {
+
+  if (abortSignal.aborted) {
+      return "Request aborted immediately";
+    }
+
+
   let chat_json = {"chat_history": []};
   const userInput_ = text;
   console.log("input value:", userInput_);
@@ -28,6 +34,9 @@ export async function insertText(text: string) {
     // const searchResult = await searchAgent.run("How to do this using excel javascript excel addin?" + 
     //                                       userInput_)
     
+    if (abortSignal.aborted) {
+      return "Request aborted immediately";
+    }
     let searchResult = await googleWebSearch("How to do this using excel javascript excel addin?" + 
                                           userInput_);
     chat_json = await addChatHistoryEntry(chat_json, "WebSearchAgent", searchResult);
@@ -35,7 +44,13 @@ export async function insertText(text: string) {
     
     if (!agenticRAG.initialised)
     {
+      if (abortSignal.aborted) {
+      return "Request aborted immediately";
+      }
       await agenticRAG.init();
+    }
+    if (abortSignal.aborted) {
+      return "Request aborted immediately";
     }
     const ragResponse = await agenticRAG.run("Users wants to generate code to do this using excel javascript excel addin. User query -" + 
                                           userInput_ +
@@ -48,7 +63,9 @@ export async function insertText(text: string) {
     //     temperature: 0.0,
     //     apiKey:'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' // or pass directly as a string
     //     });
-
+    if (abortSignal.aborted) {
+      return "Request aborted immediately";
+    }
     const response = await googleAi.models.generateContent({
       model: "gemini-2.5-flash",
       contents:chat_json.chat_history.map(entry => `${entry.role}: ${entry.response}`).join("\n"),
@@ -60,6 +77,9 @@ export async function insertText(text: string) {
     //     ]);
 
     if (response) {
+      if (abortSignal.aborted) {
+      return "Request aborted immediately";
+    }
       let extractedCode = await googleAi.models.generateContent({
       model: "gemini-2.5-flash",
       contents:response.text,
@@ -84,7 +104,9 @@ export async function insertText(text: string) {
 
       const createdFn = new Function(code);
       const llmCreatedFn = createdFn();
-      
+      if (abortSignal.aborted) {
+      return "Request aborted immediately";
+    }
       try {
         await llmCreatedFn(); 
         executedResonposeSucessfully = true;
@@ -93,6 +115,7 @@ export async function insertText(text: string) {
         console.log("Error in dynamic function: " + error);
         chat_json = addChatHistoryEntry(chat_json, "user", "encountering following error while executing your suggested code:" + error.message);
       }
+      return code;
     }};
     
     // await Excel.run(async (context) => {

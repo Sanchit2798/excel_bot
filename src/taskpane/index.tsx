@@ -3,6 +3,8 @@ import { createRoot } from "react-dom/client";
 import App from "./components/App";
 import Reload from "./components/Reload";
 import { FluentProvider, webLightTheme } from "@fluentui/react-components";
+import '../styles/globals.css'; 
+
 /* global document, Office, module, require, HTMLElement */
 const title = "Contoso Task Pane Add-in";
 const rootElement: HTMLElement | null = document.getElementById("container");
