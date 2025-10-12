@@ -10,8 +10,26 @@ const agenticRAG = new AgenticRAG();
 // Configure the client
 const googleAi = new GoogleGenAI({apiKey:'AIzaSyBUQ7qNn8wc5NAdpL-j1MblLYykxwpVTns'});
 
-export async function respondToUserQuery(text: string, abortSignal: AbortSignal) {
+// export async function* respondToUserQuery(text: string, abortSignal: AbortSignal) : AsyncGenerator<string> {
+//   const chunks = ["One", "Two", "Three", ` ${text}`];
+//   if (abortSignal.aborted) {
+//       yield "Request aborted immediately";
+//       return;
+//     }
 
+//   yield "Processing your input...\n";
+  
+//   for (let i = 0; i < 4; i++) {
+//     console.log(i);
+//     // Simulate async delay
+//     await new Promise((r) => setTimeout(r, 1000));
+//     yield chunks[i]; 
+//   };
+//   yield "ENdeed";
+// }
+
+export async function* respondToUserQuery(text: string, abortSignal: AbortSignal) : AsyncGenerator<string> {
+  yield "Processing your input...\n";
   if (abortSignal.aborted) {
       return "Request aborted immediately";
     }
@@ -35,8 +53,10 @@ export async function respondToUserQuery(text: string, abortSignal: AbortSignal)
     //                                       userInput_)
     
     if (abortSignal.aborted) {
-      return "Request aborted immediately";
+      yield "Request aborted immediately";
+      return;
     }
+    yield "Making web search ...\n";
     let searchResult = await googleWebSearch("How to do this using excel javascript excel addin?" + 
                                           userInput_);
     chat_json = await addChatHistoryEntry(chat_json, "WebSearchAgent", searchResult);
@@ -45,13 +65,16 @@ export async function respondToUserQuery(text: string, abortSignal: AbortSignal)
     if (!agenticRAG.initialised)
     {
       if (abortSignal.aborted) {
-      return "Request aborted immediately";
+        yield "Request aborted immediately";
+        return;
       }
       await agenticRAG.init();
     }
     if (abortSignal.aborted) {
-      return "Request aborted immediately";
+        yield "Request aborted immediately";
+        return;
     }
+    yield "Searching add in docs...\n";
     const ragResponse = await agenticRAG.run("Users wants to generate code to do this using excel javascript excel addin. User query -" + 
                                           userInput_ +
                                           "Some reteived info from web search included this:"+
@@ -64,8 +87,11 @@ export async function respondToUserQuery(text: string, abortSignal: AbortSignal)
     //     apiKey:'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' // or pass directly as a string
     //     });
     if (abortSignal.aborted) {
-      return "Request aborted immediately";
+        yield "Request aborted immediately";
+        return;
     }
+
+    yield "Coding...\n";
     const response = await googleAi.models.generateContent({
       model: "gemini-2.5-flash",
       contents:chat_json.chat_history.map(entry => `${entry.role}: ${entry.response}`).join("\n"),
@@ -78,8 +104,10 @@ export async function respondToUserQuery(text: string, abortSignal: AbortSignal)
 
     if (response) {
       if (abortSignal.aborted) {
-      return "Request aborted immediately";
+        yield "Request aborted immediately";
+        return;
     }
+      yield "Finalising code...\n";
       let extractedCode = await googleAi.models.generateContent({
       model: "gemini-2.5-flash",
       contents:response.text,
@@ -99,25 +127,30 @@ export async function respondToUserQuery(text: string, abortSignal: AbortSignal)
         console.log("No <code> block found.");
       }
 
+      yield "Generated code- \n";
+      yield code + "\n";
       chat_json = await addChatHistoryEntry(chat_json, "You", code);
       console.log(code);
 
+      return;
       const createdFn = new Function(code);
       const llmCreatedFn = createdFn();
       if (abortSignal.aborted) {
-      return "Request aborted immediately";
+        yield "Request aborted immediately";
+        return;
     }
       try {
         await llmCreatedFn(); 
         executedResonposeSucessfully = true;
+        return;
       }
       catch (error) {
         console.log("Error in dynamic function: " + error);
         chat_json = addChatHistoryEntry(chat_json, "user", "encountering following error while executing your suggested code:" + error.message);
       }
-      return code;
+      
     }};
-    
+    return;
     // await Excel.run(async (context) => {
     // const sheet = context.workbook.worksheets.getActiveWorksheet();
     // const range = sheet.getRange("A1");

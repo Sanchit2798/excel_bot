@@ -26,9 +26,10 @@
     "watch": "webpack --mode development --watch"
   },
   "dependencies": {
-    "@assistant-ui/react": "^0.11.19",
+    "@assistant-ui/react": "^0.11.28",
     "@assistant-ui/react-ai-sdk": "^1.1.1",
     "@assistant-ui/react-markdown": "^0.11.0",
+    "@assistant-ui/react-ui": "^0.2.0",
     "@fluentui/react-components": "^9.55.1",
     "@fluentui/react-icons": "^2.0.264",
     "@google/genai": "^1.20.0",
