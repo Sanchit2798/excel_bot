@@ -28,15 +28,14 @@ const googleAi = new GoogleGenAI({apiKey:'AIzaSyBUQ7qNn8wc5NAdpL-j1MblLYykxwpVTn
 //   yield "ENdeed";
 // }
 
-export async function* respondToUserQuery(text: string, abortSignal: AbortSignal) : AsyncGenerator<string> {
+export async function* respondToUserQuery(messages : any, abortSignal: AbortSignal) : AsyncGenerator<string> {
   yield "Processing your input...\n";
   if (abortSignal.aborted) {
       return "Request aborted immediately";
     }
 
-
   let chat_json = {"chat_history": []};
-  const userInput_ = text;
+  const userInput_ = messages.map((m) => m.role + ": " + m.content.map(obj => obj.text).join(",")).join(". \n");
   console.log("input value:", userInput_);
   chat_json = await addChatHistoryEntry(chat_json, "user", userInput_);
 
