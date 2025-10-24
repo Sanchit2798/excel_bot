@@ -11,43 +11,44 @@ import {
 import { respondToUserQuery } from "./taskpane";
 import { makeAssistantTool, tool } from "@assistant-ui/react";
 import { z } from "zod";
-import { Chat } from "@google/genai";
 
-let chatMessages = [];
+let chatMessageHistory: { role: string; content: string }[] = [];
 let userMessageNeedsExecution = false;
 
 const MyModelAdapter: ChatModelAdapter = {
 
   async *run({ messages, abortSignal }) {
     // TODO replace with your own API
-    let userMessages = messages.map((m) => ({
-        role: m.role,
-        content: m.content
-          .filter((c) => c.type === "text"),
-      }))  
+    let textMessages = messages.map((m) => {
+    const textPart = m.content.find((c) => c.type === "text");
+    return {
+      role: m.role,
+      content: textPart && 'text' in textPart ? textPart.text : "",
+    };
+    });
 
     if (userMessageNeedsExecution){
       userMessageNeedsExecution = false;
-      chatMessages.push(userMessages[userMessages.length - 1]);
-      const extractedCode = userMessages[userMessages.length - 1].content[0] as any;
+      chatMessageHistory.push(textMessages[textMessages.length - 1]);
+      const extractedCode = textMessages[textMessages.length - 1].content;
       yield {
         content: [
         {
           type: "text",
-          text :  `\`\`\`typescript ${extractedCode.text} `,
+          text :  `\`\`\`typescript\n${extractedCode}\n\`\`\``,
         },
 
         { type: "tool-call" as const, 
           toolCallId:"1", 
           toolName:"approvalTool", 
-          args:{suggestions:extractedCode.text},
+          args:{suggestions:extractedCode},
           argsText:"abcd"
         }]
       };
       return;
     }
-    chatMessages.push(userMessages[userMessages.length - 1]);
-    const responseFromAgent = await respondToUserQuery(chatMessages, abortSignal);
+    chatMessageHistory.push(textMessages[textMessages.length - 1]);
+    const responseFromAgent = await respondToUserQuery(chatMessageHistory, abortSignal);
     console.log(abortSignal);
     let text = "";
     for await (const part of responseFromAgent) {
@@ -58,13 +59,13 @@ const MyModelAdapter: ChatModelAdapter = {
     }
 
     const extractedCode = extractGeneratedCode(text);
-    chatMessages.push({role:"assistant",
-      content: [{text : extractedCode}]});
+    chatMessageHistory.push({role:"assistant",
+      content: extractedCode});
     yield {
         content: [
         {
           type: "text",
-          text :  `\`\`\`typescript ${extractedCode}`,
+          text : `\`\`\`typescript\n${extractedCode}\n\`\`\``,
         },
 
         { type: "tool-call" as const, 
@@ -74,21 +75,6 @@ const MyModelAdapter: ChatModelAdapter = {
           argsText:"abcd"
         }]
     };
-
-//     yield {
-//       content: [
-//         {
-//           type: "text",
-//           text: `\`\`\`typescript
-// function greet(name: string) {
-//   return "Hello, " + name;
-// }
-
-// console.log(greet("${name}"));
-// \`\`\``
-//         },
-//       ],
-//     };
   },
 };
 
@@ -129,7 +115,7 @@ export const ApprovalToolUI = makeAssistantToolUI<
   { approved: boolean }
 >({
   toolName: "approvalTool",
-  render: ({ args, resume }) => {
+  render: ({ args }) => {
       const [response, setResponse] = useState<string | null>(null);
       const handleApproval = async (approved: boolean) => {
       const result = await resumeWithApproval({ approved }, args.suggestions as string);
@@ -186,7 +172,6 @@ export const ApprovalToolUI = makeAssistantToolUI<
       </div>
 
       );
-      resume({ approved: false }); // Default to rejection if UI is dismissed
   },
 });
 
@@ -197,24 +182,21 @@ async function resumeWithApproval(result: { approved: boolean }, code: string) {
     const llmCreatedFn = createdFn(); 
     try {
         await llmCreatedFn();
-        chatMessages.push({role:"system",
-          content: [{type:"text", 
-            text: "Code executed successfully."}]});
+        chatMessageHistory.push({role:"system",
+          content: "Code executed successfully."});
          console.log("Code executed successfully.");
         return "Code executed successfully.";
       }
       catch (error) { 
         console.log("Error in dynamic function: " + error);
-          chatMessages.push({role:"system",
-            content: [{type:"text", 
-              text: "Error encountered \n" + error.toString()}]});
+          chatMessageHistory.push({role:"system",
+            content: "Error encountered \n" + error.toString()});
         return "Error encountered \n" + error.toString();
       }
   }
   else {
-    chatMessages.push({role:"user",
-      content: [{type:"text", 
-        text: "Do not run the code."}]});
+    chatMessageHistory.push({role:"user",
+      content: "Do not run the code."});
     userMessageNeedsExecution = true;
     return "Enter code to execute.";
   }
@@ -255,7 +237,7 @@ export function MyRuntimeProvider({
     <AssistantRuntimeProvider runtime={runtime} >
       <button onClick={() => {
         runtime.thread.reset();
-        chatMessages = [];
+        chatMessageHistory = [];
       }}>Reset chat</button>
       <ApprovalTool/>
       <ApprovalToolUI/>
