@@ -117,9 +117,14 @@ export const ApprovalToolUI = makeAssistantToolUI<
   toolName: "approvalTool",
   render: ({ args }) => {
       const [response, setResponse] = useState<string | null>(null);
+      const [runMyCodeButtonText, setrunMyCodeButtonText] = useState<string | null>("Run My Code");
       const handleApproval = async (approved: boolean) => {
-      const result = await resumeWithApproval({ approved }, args.suggestions as string);
-      setResponse(result); // assuming result is a string or JSX
+      const result = await resumeWithApproval(
+        { approved: approved, runMyCodeActive: userMessageNeedsExecution },
+        args.suggestions as string
+      );
+      setResponse(result.response); // assuming result is a string or JSX
+      setrunMyCodeButtonText(result.codeButtonText);
       };
 
       return (
@@ -158,7 +163,7 @@ export const ApprovalToolUI = makeAssistantToolUI<
             onMouseOver={(e) => (e.currentTarget.style.backgroundColor = "#e0e0e0")}
             onMouseOut={(e) => (e.currentTarget.style.backgroundColor = "#f0f0f0")}
           >
-            Run My Code
+            {runMyCodeButtonText}
           </button>
         </div>
 
@@ -175,7 +180,7 @@ export const ApprovalToolUI = makeAssistantToolUI<
   },
 });
 
-async function resumeWithApproval(result: { approved: boolean }, code: string) {
+async function resumeWithApproval(result: { approved: boolean, runMyCodeActive: boolean }, code: string) {
   if (result.approved) {
     console.log("User approved the suggestion.");
     const createdFn = new Function(code);
@@ -185,20 +190,24 @@ async function resumeWithApproval(result: { approved: boolean }, code: string) {
         chatMessageHistory.push({role:"system",
           content: "Code executed successfully."});
          console.log("Code executed successfully.");
-        return "Code executed successfully.";
+        return {response : "Code executed successfully.", codeButtonText: "Run My Code"};
       }
       catch (error) { 
         console.log("Error in dynamic function: " + error);
           chatMessageHistory.push({role:"system",
             content: "Error encountered \n" + error.toString()});
-        return "Error encountered \n" + error.toString();
+        return {response : "Error encountered \n" + error.toString(), codeButtonText: "Run My Code"};
       }
   }
   else {
-    chatMessageHistory.push({role:"user",
-      content: "Do not run the code."});
-    userMessageNeedsExecution = true;
-    return "Enter code to execute.";
+    if (result.runMyCodeActive){
+      userMessageNeedsExecution = false;
+      return {response : "Enter instruction.", codeButtonText: "Run My Code"};
+    }
+    else {
+      userMessageNeedsExecution = true;
+      return {response : "Enter code to execute.", codeButtonText: "AI Agent"};      
+    }
   }
 }
 
