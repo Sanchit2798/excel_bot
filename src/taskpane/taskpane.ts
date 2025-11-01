@@ -5,7 +5,6 @@ import { code_generation_system_prompt, code_extract_prompt } from './prompts';
 import { AgenticRAG } from './agents/agentic-rag';
 import {googleWebSearch} from './agents/google-gen-web-search';
 const agenticRAG = new AgenticRAG();
-// Configure the client
 const googleAi = new GoogleGenAI({apiKey:'AIzaSyBUQ7qNn8wc5NAdpL-j1MblLYykxwpVTns'});
 
 async function* checkAbortSignal(abortSignal: AbortSignal){
