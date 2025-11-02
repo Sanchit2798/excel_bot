@@ -1,12 +1,8 @@
 /* global Excel console */
-const groqModule = require('@langchain/groq');
-import { GoogleGenAI } from "@google/genai";
 import { code_generation_system_prompt, code_extract_prompt } from './prompts';
-import { AgenticRAG } from './agents/agentic-rag';
+import { agenticRAG } from './agents/agentic-rag';
 import {googleWebSearch} from './agents/google-gen-web-search';
-const agenticRAG = new AgenticRAG();
-const googleAi = new GoogleGenAI({apiKey:'AIzaSyBUQ7qNn8wc5NAdpL-j1MblLYykxwpVTns'});
-
+import { googleAi } from "./agents/google-gen-ai";
 async function* checkAbortSignal(abortSignal: AbortSignal){
   if (abortSignal.aborted){
     yield "Request aborted immediately";

@@ -2,7 +2,7 @@ import * as fs from "fs/promises";
 import { PDFLoader } from "@langchain/community/document_loaders/fs/pdf";
 import { RecursiveCharacterTextSplitter } from "@langchain/textsplitters";
 import { DirectoryLoader } from "langchain/document_loaders/fs/directory";
-import { IChunk } from "./IChunk";
+import { IChunk } from "./ichunk";
 import { HNSWLib } from "@langchain/community/vectorstores/hnswlib";
 import { GoogleGenerativeAIEmbeddings } from "@langchain/google-genai";
 import { TaskType } from "@google/generative-ai";

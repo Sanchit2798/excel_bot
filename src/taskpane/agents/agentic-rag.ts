@@ -9,7 +9,7 @@ import { ChatPromptTemplate } from "@langchain/core/prompts";
 import { HumanMessage, AIMessage, BaseMessage } from "@langchain/core/messages";
 const groqModule = require('@langchain/groq');
 import { MemoryVectorStore } from "langchain/vectorstores/memory";
-import { IChunk } from './IChunk';
+import { IChunk } from './ichunk';
 import * as Chunks from '../../api_documentation/api-doc-split-chunks.json';
 // import { HNSWLib } from "@langchain/community/vectorstores/hnswlib";
 
@@ -348,7 +348,7 @@ export class AgenticRAG {
   }
 }
 
-// const agenticRAG = new AgenticRAG();
+export const agenticRAG = new AgenticRAG();
 // agenticRAG.init().then(() => {agenticRAG.run("How to create pivot table using javascript excel api?").then(response => {
 //     console.log("Final response:", response);
 // })});

@@ -6,7 +6,7 @@ import {
   useLocalRuntime,
   type ChatModelAdapter,
 } from "@assistant-ui/react";
-import { respondToUserQuery } from "../taskpane";
+import { respondToUserQuery } from "../respond-to-query";
 import { ApprovalTool, ApprovalToolUI } from "./ApprovalTool";
 
 let chatMessageHistory: { role: string; content: string }[] = [];
