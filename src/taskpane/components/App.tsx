@@ -3,7 +3,7 @@ import { HeroListItem } from "./HeroList";
 import { makeStyles } from "@fluentui/react-components";
 import { Ribbon24Regular, LockOpen24Regular, DesignIdeas24Regular } from "@fluentui/react-icons";
 import { MyRuntimeProvider } from "./MyRuntimeProvider";
-import { Thread } from "../../components/thread";
+import { Thread } from "../../assistantai_components/thread";
 
 interface AppProps {
   title: string;
