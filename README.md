@@ -22,16 +22,18 @@ It might take some time for the add in to load and if its your first time it mig
 
 ## Example
 
-- Start the server:
+- Start the server
 <img src="assets/example_start.png" alt="Start server demo" width="400" height="200"/>
 
-- If a reload screen appears, click the Reload button to continue:
-<img src="assets/example_reload.png" alt="Reload screen" width="400" height="400"/>
+- If a reload screen appears, click the Reload button to continue
+<img src="assets/example_reload.png" alt="Reload screen" width="300" height="300"/>
 
 - This will open the Excel Bot chat
-![Chat with the Excel Bot](assets/example_chat.png)
+<img src="assets/example_chat.png" alt="Chat screen" width="300" height="300"/>
+
 - Type the instruction
-![Instruction sent](assets/example_instruction.png)
+<img src="assets/example_instruction.png" alt="Send instruction to AI agent" width="300" height="300"/>
+
 - The AI agent generates code to fulfill the user's instruction.
 ![Code generated](assets/example_code_gen.png)
 - Now you can click on execute to execute this code.
