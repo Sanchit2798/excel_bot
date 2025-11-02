@@ -23,7 +23,7 @@ It might take some time for the add in to load and if its your first time it mig
 ## Example
 
 - Start the server:
-![Example start server](assets/example_start.png)
+<img src="assets/example_start.png" alt="Demo" width="600" height="400"/>
 - If a reload screen appears, simply click the Reload button to continue.
 ![Reload the window](assets/example_reload.png)
 - This will open the Excel Bot chat
