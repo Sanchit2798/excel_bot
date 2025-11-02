@@ -25,7 +25,7 @@ It might take some time for the add in to load and if its your first time it mig
 - Start the server:
 <img src="assets/example_start.png" alt="Demo" width="600" height="400"/>
 - If a reload screen appears, simply click the Reload button to continue.
-<img src="assets/example_reload.png" alt="Reload windo" width="600" height="400"/>
+<img src="assets/example_reload.png" alt="Reload windo" width="400" height="400"/>
 - This will open the Excel Bot chat
 ![Chat with the Excel Bot](assets/example_chat.png)
 - Type the instruction
