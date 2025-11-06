@@ -10,7 +10,7 @@ const title = "Excel Bot Add-in (developed by Sanchit Jain)";
 const rootElement: HTMLElement | null = document.getElementById("container");
 const root = rootElement ? createRoot(rootElement) : undefined;
 
-localStorage.removeItem('GOOGLE_AI_API_KEY');
+// localStorage.removeItem('GOOGLE_AI_API_KEY');
 /* Render application after Office initializes */
 let isOfficeLoaded = false;
 
