@@ -28,7 +28,7 @@ It might take some time for the add in to load and if its your first time it mig
 - If a reload screen appears, click the Reload button to continue
 <img src="assets/example_reload.png" alt="Reload screen" width="300" height="300"/>
 
-- Enter your Google Generative AI API key to enable access to the Gemini model, then click Save.
+- Enter your Google Generative AI API key to enable access to the Gemini model, then click Save. You can create one here - https://aistudio.google.com/u/1/api-keys
 <img src="assets/example_api_key.png" alt="Reload screen" width="300" height="300"/>
 
 - This will open the Excel Bot chat
