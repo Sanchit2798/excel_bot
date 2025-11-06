@@ -15,10 +15,10 @@ const ApiKeyInput: React.FC<ApiKeyInputProps> = ({ onSave })=> {
 
   return (
     <div style={{ padding: '20px' }}>
-      <h1>Excel Add-in Dev Panel</h1>
+      <h1>Welcome to Excel Bot (developed by Sanchit Jain)</h1>
 
       <label htmlFor="apiKey" style={{ display: 'block', marginBottom: '0.5rem' }}>
-        Enter API Key:
+        Enter Google Gen AI API Key:
       </label>
       <input
         id="apiKey"

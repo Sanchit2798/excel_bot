@@ -6,7 +6,7 @@ import { FluentProvider, webLightTheme } from "@fluentui/react-components";
 import '../styles/globals.css'; 
 
 /* global document, Office, module, require, HTMLElement */
-const title = "Contoso Task Pane Add-in";
+const title = "Excel Bot Add-in (developed by Sanchit Jain)";
 const rootElement: HTMLElement | null = document.getElementById("container");
 const root = rootElement ? createRoot(rootElement) : undefined;
 
