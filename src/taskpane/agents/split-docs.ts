@@ -40,19 +40,6 @@ async function splitDocs(){
   // File path
   const filePath = "./src/api_documentation/api-doc-split-chunks.json";
   await saveChunksToFile(splitDocsCleaned, filePath);
-  // const embeddings = new GoogleGenerativeAIEmbeddings({
-  //     model: "text-embedding-004", // 768 dimensions
-  //     taskType: TaskType.RETRIEVAL_DOCUMENT,
-  //     apiKey: "AIzaSyBUQ7qNn8wc5NAdpL-j1MblLYykxwpVTns" // or pass directly as a string
-  //     });
-  // const validDocs = splitDocsCleaned.filter(
-  //         doc => typeof doc.pageContent === 'string' && doc.pageContent.trim().length > 0
-  //     );    
-  // const vectorStore = await HNSWLib.fromDocuments([], embeddings); //new MemoryVectorStore(embeddings);
-  // await vectorStore.addDocuments(validDocs);
-  // const directory = "./src/api_documentation/";
-  // await vectorStore.save(directory);
 }
 
 splitDocs();
-// export const docIds = splitDocs.map((doc, index) => `${index}`);

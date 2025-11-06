@@ -10,24 +10,26 @@ jest.mock("../taskpane/agents/agentic-rag", () => {
   };
 });
 
+const generateContentMock = jest
+  .fn()
+  .mockResolvedValueOnce({ text: "<code>console.log('Hello')</code>" }) // codeResponse
+  .mockResolvedValueOnce({ text: "<code>console.log('Hello')</code>" }); // extractedCode
+
 jest.mock("../taskpane/agents/google-gen-ai", () => ({
-  googleAi: {
+  getGoogleAi: jest.fn(() => ({
     models: {
-      generateContent: jest
-        .fn()
-        .mockResolvedValueOnce({ text: "<code>console.log('Hello')</code>" }) // codeResponse
-        .mockResolvedValueOnce({ text: "<code>console.log('Hello')</code>" }), // extractedCode
+      generateContent: generateContentMock,
     },
-  },
+  })),
 }));
 
 jest.mock("../taskpane/agents/google-gen-web-search", () => ({
-  googleWebSearch: jest.fn().mockResolvedValue("search result")
+  googleWebSearch: jest.fn().mockResolvedValue("search result"),
 }));
 
-import { agenticRAG } from '../taskpane/agents/agentic-rag';
-import {googleWebSearch} from '../taskpane/agents/google-gen-web-search';
-import {googleAi} from '../taskpane/agents/google-gen-ai';
+import { agenticRAG } from "../taskpane/agents/agentic-rag";
+import { googleWebSearch } from "../taskpane/agents/google-gen-web-search";
+import { getGoogleAi } from "../taskpane/agents/google-gen-ai";
 
 describe("respondToUserQuery", () => {
   it("should yield expected messages for a valid user query", async () => {
@@ -53,6 +55,7 @@ describe("respondToUserQuery", () => {
     expect(googleWebSearch).toHaveBeenCalled();
     expect(agenticRAG.init).toHaveBeenCalled();
     expect(agenticRAG.run).toHaveBeenCalled();
-    expect(googleAi.models.generateContent).toHaveBeenCalledTimes(2);
+    expect(getGoogleAi).toHaveBeenCalled(); // function call
+    expect(generateContentMock).toHaveBeenCalledTimes(2); // actual model call
   });
 });

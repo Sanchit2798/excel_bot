@@ -2,7 +2,7 @@
 import { code_generation_system_prompt, code_extract_prompt } from './prompts';
 import { agenticRAG } from './agents/agentic-rag';
 import {googleWebSearch} from './agents/google-gen-web-search';
-import { googleAi } from "./agents/google-gen-ai";
+import { getGoogleAi } from "./agents/google-gen-ai";
 async function* checkAbortSignal(abortSignal: AbortSignal){
   if (abortSignal.aborted){
     yield "Request aborted immediately";
@@ -44,7 +44,7 @@ export async function* respondToUserQuery(messages : { role: string; content: st
     
   checkAbortSignal(abortSignal);
   yield "Coding...\n";
-  const codeResponse = await googleAi.models.generateContent({
+  const codeResponse = await getGoogleAi().models.generateContent({
       model: "gemini-2.5-flash",
       contents: createInputForCodingLLm(lastUserMessage, messages),
       config: {systemInstruction:code_generation_system_prompt}
@@ -52,7 +52,7 @@ export async function* respondToUserQuery(messages : { role: string; content: st
 
   checkAbortSignal(abortSignal);
   yield "Finalisign code ...\n";
-  let extractedCode = await googleAi.models.generateContent({
+  let extractedCode = await getGoogleAi().models.generateContent({
                                             model: "gemini-2.5-flash",
                                             contents:codeResponse.text,
                                             config: {systemInstruction:code_extract_prompt}

@@ -1,7 +1,5 @@
-import { GoogleGenAI } from "@google/genai";
+import { getGoogleAi } from "./google-gen-ai";
 
-// Configure the client
-const ai = new GoogleGenAI({apiKey:'AIzaSyBUQ7qNn8wc5NAdpL-j1MblLYykxwpVTns'});
 export async function googleWebSearch(query:string){
     // Define the grounding tool
     const groundingTool = {
@@ -14,7 +12,7 @@ export async function googleWebSearch(query:string){
     };
 
     // Make the request
-    const responseGemini = await ai.models.generateContent({
+    const responseGemini = await getGoogleAi().models.generateContent({
         model: "gemini-2.5-flash",
         contents: query,
         config,

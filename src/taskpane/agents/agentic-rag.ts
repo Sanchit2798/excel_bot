@@ -1,19 +1,14 @@
-import { GoogleGenerativeAIEmbeddings } from "@langchain/google-genai";
-import { TaskType } from "@google/generative-ai";
+import { getGoogleEmbeddings, getGoogleLlm } from "./google-gen-ai";
 import { Annotation, StateGraph, START, END } from "@langchain/langgraph/web";
 import { createRetrieverTool } from "langchain/tools/retriever";
 import { ToolNode } from "@langchain/langgraph/prebuilt";
 import { z } from "zod";
-// import { pull } from "langchain/hub";
 import { ChatPromptTemplate } from "@langchain/core/prompts";
 import { HumanMessage, AIMessage, BaseMessage } from "@langchain/core/messages";
-const groqModule = require('@langchain/groq');
 import { MemoryVectorStore } from "langchain/vectorstores/memory";
 import { IChunk } from './ichunk';
 import * as Chunks from '../../api_documentation/api-doc-split-chunks.json';
-// import { HNSWLib } from "@langchain/community/vectorstores/hnswlib";
 
-// export const AgenticRAG = "HI am agent";
 const GraphState = Annotation.Root({
   messages: Annotation<BaseMessage[]>({
     reducer: (x, y) => x.concat(y),
@@ -22,12 +17,6 @@ const GraphState = Annotation.Root({
 })
 
 const getRetriever = async () => {
-    const embeddings = new GoogleGenerativeAIEmbeddings({
-    model: "text-embedding-004", // 768 dimensions
-    taskType: TaskType.RETRIEVAL_DOCUMENT,
-    apiKey: "AIzaSyBUQ7qNn8wc5NAdpL-j1MblLYykxwpVTns" // or pass directly as a string
-    });
-  
     // Convert Chunks to an array if it's not already
     const splittedDocs: IChunk[] = Array.isArray(Chunks) 
         ? Chunks as IChunk[] 
@@ -36,18 +25,10 @@ const getRetriever = async () => {
     const validDocs = splittedDocs.filter(
         doc => typeof doc.pageContent === 'string' && doc.pageContent.trim().length > 0
     );
-    const vectorStore = new MemoryVectorStore(embeddings); //await HNSWLib.fromDocuments([], embeddings);
+    const vectorStore = new MemoryVectorStore(getGoogleEmbeddings());
     await vectorStore.addDocuments(validDocs);
     let retriever = vectorStore.asRetriever();
     
-    // Save the vector store to a directory
-    // const HNSWLib = await import('@langchain/community/vectorstores/hnswlib');
-    // const directory = "../../api_documentation/";
-    // await vectorStore.save(directory);
-
-    // Load the vector store from the same directory
-    // const loadedVectorStore = await HNSWLib.load(directory, embeddings);
-    // let retriever = loadedVectorStore.asRetriever();
     const tool = createRetrieverTool(
     retriever,
     {
@@ -128,12 +109,7 @@ async function gradeDocuments(state: typeof GraphState.State){
   No: The docs are not relevant to the question.`,
   );
 
-  const model =  new groqModule.ChatGroq({
-    model: "llama-3.1-8b-instant", // or any other supported model
-    temperature: 0.2,
-    apiKey:'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'
-  }).withStructuredOutput(ResponseFormatter);
-  //.bindTools([tool]);
+  const model =  getGoogleLlm().withStructuredOutput(ResponseFormatter);
 
   const chain = prompt.pipe(model);
 
@@ -160,18 +136,10 @@ function checkRelevance(state: typeof GraphState.State): string {
 
   const { messages } = state;
   const lastMessage = messages[messages.length - 1];
-  // if (!("tool_calls" in lastMessage)) {
-  //   throw new Error("The 'checkRelevance' node requires the most recent message to contain tool calls.")
-  // }
-  // const toolCalls = (lastMessage as AIMessage).tool_calls;
-  // if (!toolCalls || !toolCalls.length) {
-  //   throw new Error("Last message was not a function message");
-  // }
 
-  // Safely extract binaryScore from lastMessage.content if it exists
   let score = (lastMessage as { binaryScore?: string }).binaryScore;
 
-  if (score === "yes"){ //toolCalls[0].args.binaryScore === "yes") {
+  if (score === "yes"){ 
   console.log("---DECISION: DOCS RELEVANT---");
   return "yes";
   }
@@ -192,30 +160,15 @@ async function agent(state: typeof GraphState.State){
   console.log("---CALL AGENT---");
 
   const { messages } = state;
-  // Find the AIMessage which contains the `give_relevance_score` tool call,
-  // and remove it if it exists. This is because the agent does not need to know
-  // the relevance score.
+
   const filteredMessages = messages.filter((message) => {
-    // if ("tool_calls" in message && Array.isArray(message.tool_calls) && message.tool_calls.length > 0) {
-    //   return message.tool_calls[0].name !== "give_relevance_score";
-    // }
+    
     if ("binaryScore" in message) {
       return false;
     }
     return true;
   });
-// //   const model = new ChatOpenAI({
-// //     model: "gpt-4o",
-// //     temperature: 0,
-// //     streaming: true,
-// //     apiKey: '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'
-// //   }).bindTools(tools);
-  const model = new groqModule.ChatGroq({
-    model: "llama-3.1-8b-instant", // or any other supported model
-    temperature: 0.2,
-    apiKey:'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',
-    streaming: true,
-  }).bindTools(tools);
+  const model = getGoogleLlm().bindTools(tools);
 
   const response = await model.invoke(filteredMessages);
   return {
@@ -243,11 +196,7 @@ Formulate an improved question:`,
   );
 
   // Grader
-  const model = new groqModule.ChatGroq({
-    model: "llama-3.1-8b-instant", // or any other supported model
-    temperature: 0.2,
-    apiKey:'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'
-  });
+  const model = getGoogleLlm();
   const response = await prompt.pipe(model).invoke({ question });
   return {
     messages: [response],
@@ -280,11 +229,7 @@ async function generate(state: typeof GraphState.State) {
     Context: {context}
     Answer:`);
 
-  const llm = new groqModule.ChatGroq({
-    model: "llama-3.1-8b-instant", // or any other supported model
-    temperature: 0.2,
-    apiKey:'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'
-  });
+  const llm = getGoogleLlm();
 
   const ragChain = prompt.pipe(llm);
 
@@ -325,7 +270,6 @@ export class AgenticRAG {
   app: any;
   initialised=false;
   constructor() {
-    // app will be initialized after tools are ready
   }
 
   public async init() {

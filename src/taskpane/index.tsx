@@ -10,6 +10,7 @@ const title = "Contoso Task Pane Add-in";
 const rootElement: HTMLElement | null = document.getElementById("container");
 const root = rootElement ? createRoot(rootElement) : undefined;
 
+localStorage.removeItem('GOOGLE_AI_API_KEY');
 /* Render application after Office initializes */
 let isOfficeLoaded = false;
 
